@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import pandas as pd
 import joblib
 
 # Load the trained model and LabelEncoder
