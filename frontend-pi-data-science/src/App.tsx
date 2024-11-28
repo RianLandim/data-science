@@ -9,32 +9,55 @@ import image from "./assets/bg-page.jpg";
 const QueryPrevisionDataFormSchema = z.object({
   State: z.string().min(1, "Selecione um estado válido"),
   Region: z.string().min(1, "Selecione uma região válida"),
-  Month: z.string().min(1, "Selecione um trimestre válido"),
+  Month: z.string().min(1, "Selecione um mês válido"),
   Year: z.string().min(1, "Selecione um ano válido"),
 });
 
 type QueryPrevisionData = z.infer<typeof QueryPrevisionDataFormSchema>;
-
 const regions = {
-  N: ["Acre", "Amapá", "Amazonas", "Pará", "Rondônia", "Roraima", "Tocantins"],
-  NE: [
-    "Alagoas",
-    "Bahia",
-    "Ceará",
-    "Maranhão",
-    "Paraíba",
-    "Pernambuco",
-    "Piauí",
-    "Rio Grande do Norte",
-    "Sergipe",
+  N: [
+    { name: "Acre", code: "AC" },
+    { name: "Amapá", code: "AP" },
+    { name: "Amazonas", code: "AM" },
+    { name: "Pará", code: "PA" },
+    { name: "Rondônia", code: "RO" },
+    { name: "Roraima", code: "RR" },
+    { name: "Tocantins", code: "TO" },
   ],
-  CO: ["Distrito Federal", "Goiás", "Mato Grosso", "Mato Grosso do Sul"],
-  SE: ["Espírito Santo", "Minas Gerais", "Rio de Janeiro", "São Paulo"],
-  S: ["Paraná", "Rio Grande do Sul", "Santa Catarina"],
+  NE: [
+    { name: "Alagoas", code: "AL" },
+    { name: "Bahia", code: "BA" },
+    { name: "Ceará", code: "CE" },
+    { name: "Maranhão", code: "MA" },
+    { name: "Paraíba", code: "PB" },
+    { name: "Pernambuco", code: "PE" },
+    { name: "Piauí", code: "PI" },
+    { name: "Rio Grande do Norte", code: "RN" },
+    { name: "Sergipe", code: "SE" },
+  ],
+  CO: [
+    { name: "Distrito Federal", code: "DF" },
+    { name: "Goiás", code: "GO" },
+    { name: "Mato Grosso", code: "MT" },
+    { name: "Mato Grosso do Sul", code: "MS" },
+  ],
+  SE: [
+    { name: "Espírito Santo", code: "ES" },
+    { name: "Minas Gerais", code: "MG" },
+    { name: "Rio de Janeiro", code: "RJ" },
+    { name: "São Paulo", code: "SP" },
+  ],
+  S: [
+    { name: "Paraná", code: "PR" },
+    { name: "Rio Grande do Sul", code: "RS" },
+    { name: "Santa Catarina", code: "SC" },
+  ],
 };
 
 function App() {
-  const [availableStates, setAvailableStates] = useState<string[]>([]);
+  const [availableStates, setAvailableStates] = useState<
+    { name: string; code: string }[]
+  >([]);
   const [result, setResult] = useState<string | null>(null);
 
   const {
@@ -92,7 +115,8 @@ function App() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <h1 className="font-bold rounded-t-lg bg-white border-t-2 border-l-2 border-r-2 border-gray-800 px-3">
+      <h1 className="font-bold rounded-t-lg bg-white border-t-2 border-l-2 
+                      border-r-2 border-gray-800 px-3">
         PI - Data Science
       </h1>
 
@@ -129,9 +153,9 @@ function App() {
                 {...register("State")}
               >
                 <option value="">Selecione...</option>
-                {availableStates.map((state) => (
-                  <option key={state} value={state}>
-                    {state}
+                {availableStates.map(({ name, code }) => (
+                  <option key={code} value={code}>
+                    {name}
                   </option>
                 ))}
               </select>
@@ -142,12 +166,17 @@ function App() {
 
             <div className="flex flex-col rounded-md text-black">
               <h2>Selecione o ano que deseja ver:</h2>
-              <input
-                type="number"
-                placeholder="2025"
+
+              <select
                 className="w-full text-black border border-gray-800 rounded-md p-2"
                 {...register("Year")}
-              />
+              >
+                <option value="">Selecione...</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+              </select>
               {errors.Year && (
                 <p className="text-red-500 text-sm">{errors.Year.message}</p>
               )}
@@ -157,7 +186,7 @@ function App() {
               <h2>Selecione o mês do ano que deseja ver:</h2>
               <input
                 type="number"
-                placeholder="Janeiro"
+                placeholder="1 (Janeiro)"
                 className="w-full text-black border border-gray-800 rounded-md p-2"
                 {...register("Month")}
               />
@@ -181,7 +210,7 @@ function App() {
               <h1 className="text-2xl font-semibold text-center px-4">
                 {result}
               </h1>
-              <p className="text-lg text-center mt-4">
+              <p className="text-lg text-center mt-4 px-10">
                 {getRadiationCategory()}
               </p>
             </>
@@ -195,3 +224,15 @@ function App() {
 }
 
 export default App;
+
+{
+  /* <input
+                type="number"
+                placeholder="2025"
+                className="w-full text-black border border-gray-800 rounded-md p-2"
+                {...register("Year")}
+              />
+              {errors.Year && (
+                <p className="text-red-500 text-sm">{errors.Year.message}</p>
+              )} */
+}
