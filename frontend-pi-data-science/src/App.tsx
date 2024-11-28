@@ -169,7 +169,7 @@ function App() {
 
           <button
             type="submit"
-            className="border px-6 py-2 text-lg font-semibold rounded-md hover:bg-yellow-600 bg-blue-400"
+            className="transition-colors duration-333 ease-in-out px-6 py-2 text-lg font-semibold rounded-md hover:bg-yellow-600 bg-blue-400"
           >
             Solicitar
           </button>
