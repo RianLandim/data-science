@@ -3,27 +3,56 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import image from "./assets/bg-page.jpg";
 
 // Esquema de validação com Zod
 const QueryPrevisionDataFormSchema = z.object({
   State: z.string().min(1, "Selecione um estado válido"),
-  Region: z.string().min(1, "Selecione um estado válido"),
+  Region: z.string().min(1, "Selecione uma região válida"),
   Month: z.string().min(1, "Selecione um trimestre válido"),
   Year: z.string().min(1, "Selecione um ano válido"),
 });
 
 type QueryPrevisionData = z.infer<typeof QueryPrevisionDataFormSchema>;
 
+const regions = {
+  N: ["Acre", "Amapá", "Amazonas", "Pará", "Rondônia", "Roraima", "Tocantins"],
+  NE: [
+    "Alagoas",
+    "Bahia",
+    "Ceará",
+    "Maranhão",
+    "Paraíba",
+    "Pernambuco",
+    "Piauí",
+    "Rio Grande do Norte",
+    "Sergipe",
+  ],
+  CO: ["Distrito Federal", "Goiás", "Mato Grosso", "Mato Grosso do Sul"],
+  SE: ["Espírito Santo", "Minas Gerais", "Rio de Janeiro", "São Paulo"],
+  S: ["Paraná", "Rio Grande do Sul", "Santa Catarina"],
+};
+
 function App() {
+  const [availableStates, setAvailableStates] = useState<string[]>([]);
   const [result, setResult] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<QueryPrevisionData>({
     resolver: zodResolver(QueryPrevisionDataFormSchema),
   });
+
+  // Monitorar seleção de região
+  const selectedRegion = watch("Region");
+
+  // Atualiza os estados disponíveis ao selecionar uma região
+  const handleRegionChange = (region: string) => {
+    setAvailableStates(regions[region as keyof typeof regions] || []);
+  };
 
   const onSubmit = async (data: QueryPrevisionData) => {
     try {
@@ -39,115 +68,127 @@ function App() {
     }
   };
 
+  const getRadiationCategory = () => {
+    if (!result || !result.startsWith("Previsão:")) return null;
+
+    const prediction = parseFloat(result.split(":")[1].trim());
+
+    if (prediction <= 500) {
+      return "A radiação é classificada como Baixa. Pode limitar o crescimento das plantas e reduzir a produtividade.";
+    } else if (prediction <= 1000) {
+      return "A radiação é classificada como Normal. Fornece um equilíbrio ideal para a maioria das culturas.";
+    } else {
+      return "A radiação é classificada como Alta. Embora beneficie algumas culturas, pode causar estresse térmico.";
+    }
+  };
+
   return (
-    <section className="h-screen w-full bg-gray-900 text-white flex justify-center items-center px-[10%]">
-      <form
-        className="h-2/3 border-2 rounded-l-md w-1/2 py-10 items-center flex flex-col space-y-12"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <h1 className="text-2xl font-semibold">Previsão de radiação solar</h1>
-        <div className="flex flex-col space-y-6">
-          <div className="flex  flex-col">
-            <h2>Selecione a região Brasileiro:</h2>
-            <select
-              className="text-black rounded-md p-2"
-              {...register("Region")}
-            >
-              <option value="">Selecione...</option>
-              <option value="N">Norte</option>
-              <option value="NE">Nordeste</option>
-              <option value="CO">Centro-Oeste</option>
-              <option value="SE">Sudeste</option>
-              <option value="S">Sul</option>
-            </select>
-            {errors.Region && (
-              <p className="text-red-500">{errors.Region.message}</p>
-            )}
-          </div>
+    <section
+      className="h-screen w-full text-black flex justify-center items-center px-[12%] flex-col"
+      style={{
+        backgroundImage: `url(${image})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <h1 className="font-bold rounded-t-lg bg-white border-t-2 border-l-2 border-r-2 border-gray-800 px-3">
+        PI - Data Science
+      </h1>
 
-          <div className="flex  flex-col">
-            <h2>Selecione o estado Brasileiro:</h2>
-            <select
-              className="text-black rounded-md p-2"
-              {...register("State")}
-            >
-              <option value="">Selecione</option>
-              <option value="AC">Acre</option>
-              <option value="AL">Alagoas</option>
-              <option value="AP">Amapá</option>
-              <option value="AM">Amazonas</option>
-              <option value="BA">Bahia</option>
-              <option value="CE">Ceará</option>
-              <option value="DF">Distrito Federal</option>
-              <option value="ES">Espírito Santo</option>
-              <option value="GO">Goiás</option>
-              <option value="MA">Maranhão</option>
-              <option value="MT">Mato Grosso</option>
-              <option value="MS">Mato Grosso do Sul</option>
-              <option value="MG">Minas Gerais</option>
-              <option value="PA">Pará</option>
-              <option value="PB">Paraíba</option>
-              <option value="PR">Paraná</option>
-              <option value="PE">Pernambuco</option>
-              <option value="PI">Piauí</option>
-              <option value="RJ">Rio de Janeiro</option>
-              <option value="RN">Rio Grande do Norte</option>
-              <option value="RS">Rio Grande do Sul</option>
-              <option value="RO">Rondônia</option>
-              <option value="RR">Roraima</option>
-              <option value="SC">Santa Catarina</option>
-              <option value="SP">São Paulo</option>
-              <option value="SE">Sergipe</option>
-              <option value="TO">Tocantins</option>
-            </select>
-            {errors.State && (
-              <p className="text-red-500">{errors.State.message}</p>
-            )}
-          </div>
-
-          <div className="flex flex-col rounded-md text-black">
-            <h2 className="text-white font-bold">
-              Selecione o ano que deseja ver:
-            </h2>
-            <input
-              type="number"
-              className="w-full rounded-md p-2"
-              {...register("Year")}
-            />
-            {errors.Year && (
-              <p className="text-red-500">{errors.Year.message}</p>
-            )}
-          </div>
-
-          <div className="flex flex-col rounded-md text-black">
-            <h2 className="text-white font-bold">
-              Selecione o mês do ano que deseja ver:
-            </h2>
-            <input
-              type="number"
-              className="w-full rounded-md p-2"
-              {...register("Month")}
-            />
-            {errors.Month && (
-              <p className="text-red-500">{errors.Month.message}</p>
-            )}
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className="border px-6 py-2 text-lg font-semibold rounded-md bg-blue-800 hover:bg-green-800"
+      <div className="border-2 border-gray-800 bg-white rounded-lg w-full h-4/5 flex items-center">
+        <form
+          className="h-fit w-1/2 flex justify-center items-center flex-col space-y-6"
+          onSubmit={handleSubmit(onSubmit)}
         >
-          Solicitar
-        </button>
-      </form>
+          <h1 className="text-2xl font-semibold">Previsão de radiação solar</h1>
+          <div className="flex flex-col space-y-5">
+            <div className="flex flex-col">
+              <h2>Selecione a região Brasileira:</h2>
+              <select
+                className="w-full text-black border border-gray-800 rounded-md p-2"
+                {...register("Region")}
+                onChange={(e) => handleRegionChange(e.target.value)}
+              >
+                <option value="">Selecione...</option>
+                <option value="N">Norte</option>
+                <option value="NE">Nordeste</option>
+                <option value="CO">Centro-Oeste</option>
+                <option value="SE">Sudeste</option>
+                <option value="S">Sul</option>
+              </select>
+              {errors.Region && (
+                <p className="text-red-500 text-sm">{errors.Region.message}</p>
+              )}
+            </div>
 
-      <div className="h-2/3 border-2 w-1/2 rounded-r-md flex justify-center py-10 items-center">
-        {result ? (
-          <h1 className="text-2xl font-semibold text-center px-4">{result}</h1>
-        ) : (
-          <h1 className="text-2xl font-semibold">Resultado aparecerá aqui</h1>
-        )}
+            <div className="flex flex-col">
+              <h2>Selecione o estado Brasileiro:</h2>
+              <select
+                className="w-full text-black border border-gray-800 rounded-md p-2"
+                {...register("State")}
+              >
+                <option value="">Selecione...</option>
+                {availableStates.map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+              </select>
+              {errors.State && (
+                <p className="text-red-500 text-sm">{errors.State.message}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col rounded-md text-black">
+              <h2>Selecione o ano que deseja ver:</h2>
+              <input
+                type="number"
+                placeholder="2025"
+                className="w-full text-black border border-gray-800 rounded-md p-2"
+                {...register("Year")}
+              />
+              {errors.Year && (
+                <p className="text-red-500 text-sm">{errors.Year.message}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col rounded-md text-black">
+              <h2>Selecione o mês do ano que deseja ver:</h2>
+              <input
+                type="number"
+                placeholder="Janeiro"
+                className="w-full text-black border border-gray-800 rounded-md p-2"
+                {...register("Month")}
+              />
+              {errors.Month && (
+                <p className="text-red-500 text-sm ">{errors.Month.message}</p>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="border px-6 py-2 text-lg font-semibold rounded-md hover:bg-yellow-600 bg-blue-400"
+          >
+            Solicitar
+          </button>
+        </form>
+
+        <div className="border-s-2 border-gray-800 h-full w-1/2 rounded-r-md flex flex-col justify-center py-10 items-center">
+          {result ? (
+            <>
+              <h1 className="text-2xl font-semibold text-center px-4">
+                {result}
+              </h1>
+              <p className="text-lg text-center mt-4">
+                {getRadiationCategory()}
+              </p>
+            </>
+          ) : (
+            <h1 className="text-2xl font-semibold">Resultado</h1>
+          )}
+        </div>
       </div>
     </section>
   );
