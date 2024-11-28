@@ -8,7 +8,7 @@ import axios from "axios";
 const QueryPrevisionDataFormSchema = z.object({
   State: z.string().min(1, "Selecione um estado válido"),
   Region: z.string().min(1, "Selecione um estado válido"),
-  Month: z.number().min(1, "Selecione um trimestre válido"),
+  Month: z.string().min(1, "Selecione um trimestre válido"),
   Year: z.string().min(1, "Selecione um ano válido"),
 });
 
@@ -27,8 +27,12 @@ function App() {
 
   const onSubmit = async (data: QueryPrevisionData) => {
     try {
-      const response = await axios.post("http://127.0.0.1:5000/predict", data);
-      setResult(`Previsão: ${response.data.prediction}.`);
+      const response = await axios.post("http://127.0.0.1:5000/predict", {
+        ...data,
+        Month: Number(data.Month),
+        Year: Number(data.Year),
+      });
+      setResult(`Previsão: ${Number(response.data.prediction).toFixed(2)}`);
     } catch (error) {
       console.error(error);
       setResult("Erro ao processar a solicitação.");
@@ -49,34 +53,12 @@ function App() {
               className="text-black rounded-md p-2"
               {...register("Region")}
             >
-              <option value="">Selecione</option>
-              <option value="AC">Acre</option>
-              <option value="AL">Alagoas</option>
-              <option value="AP">Amapá</option>
-              <option value="AM">Amazonas</option>
-              <option value="BA">Bahia</option>
-              <option value="CE">Ceará</option>
-              <option value="DF">Distrito Federal</option>
-              <option value="ES">Espírito Santo</option>
-              <option value="GO">Goiás</option>
-              <option value="MA">Maranhão</option>
-              <option value="MT">Mato Grosso</option>
-              <option value="MS">Mato Grosso do Sul</option>
-              <option value="MG">Minas Gerais</option>
-              <option value="PA">Pará</option>
-              <option value="PB">Paraíba</option>
-              <option value="PR">Paraná</option>
-              <option value="PE">Pernambuco</option>
-              <option value="PI">Piauí</option>
-              <option value="RJ">Rio de Janeiro</option>
-              <option value="RN">Rio Grande do Norte</option>
-              <option value="RS">Rio Grande do Sul</option>
-              <option value="RO">Rondônia</option>
-              <option value="RR">Roraima</option>
-              <option value="SC">Santa Catarina</option>
-              <option value="SP">São Paulo</option>
-              <option value="SE">Sergipe</option>
-              <option value="TO">Tocantins</option>
+              <option value="">Selecione...</option>
+              <option value="N">Norte</option>
+              <option value="NE">Nordeste</option>
+              <option value="CO">Centro-Oeste</option>
+              <option value="SE">Sudeste</option>
+              <option value="S">Sul</option>
             </select>
             {errors.Region && (
               <p className="text-red-500">{errors.Region.message}</p>

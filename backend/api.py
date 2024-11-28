@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import pandas as pd
 import joblib
+from flask_cors import CORS
 
 # Load the trained model and LabelEncoder
 rf_model = joblib.load('./model/rf_model_treinado.joblib')
@@ -8,6 +9,9 @@ region_label_encoder = joblib.load('./model/rf_label_encoder_region.joblib')
 state_label_encoder = joblib.load('./model/rf_label_encoder_state.joblib')
 
 app = Flask(__name__)
+
+CORS(app)
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
